@@ -17,8 +17,10 @@ def _causal_conv1d_fwd_cpp(
     initial_states: torch.Tensor | None,
     out: torch.Tensor,
     final_states_out: torch.Tensor | None,
+    number_of_threads: int | None,
     silu_activation: bool,
 ) -> None:
+    number_of_threads = number_of_threads or -1
     causal_conv1d_cuda.causal_conv1d_fwd(
         x,
         weight,
@@ -27,6 +29,7 @@ def _causal_conv1d_fwd_cpp(
         initial_states,
         out,
         final_states_out,
+        number_of_threads,
         silu_activation,
     )
 
@@ -50,8 +53,10 @@ def _causal_conv1d_bwd_cpp(
     dweight: torch.Tensor,
     dbias: torch.Tensor | None,
     dinitial_states: torch.Tensor,
+    number_of_threads: int | None,
     silu_activation: bool,
 ) -> None:
+    number_of_threads = number_of_threads or -1
     causal_conv1d_cuda.causal_conv1d_bwd(
         x,
         weight,
@@ -64,6 +69,7 @@ def _causal_conv1d_bwd_cpp(
         dweight,
         dbias,
         dinitial_states,
+        number_of_threads,
         silu_activation,
     )
 
@@ -78,7 +84,9 @@ def _causal_conv1d_update_cpp(
     silu_activation: bool,
     cache_seqlens: torch.Tensor | None,
     conv_state_indices: torch.Tensor | None,
+    number_of_threads: int | None,
 ) -> None:
+    number_of_threads = number_of_threads or -1
     causal_conv1d_cuda.causal_conv1d_update(
         x,
         conv_state,
@@ -87,7 +95,8 @@ def _causal_conv1d_update_cpp(
         out,
         silu_activation,
         cache_seqlens,
-        conv_state_indices
+        conv_state_indices,
+        number_of_threads
     )
 
 

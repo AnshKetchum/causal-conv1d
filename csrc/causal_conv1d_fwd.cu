@@ -163,12 +163,13 @@ void causal_conv1d_fwd_launch(ConvParamsBase &params, cudaStream_t stream) {
 
 template<typename input_t, typename weight_t>
 void causal_conv1d_fwd_cuda(ConvParamsBase &params, cudaStream_t stream) {
+    int nthreads = (params.number_of_threads > 0) ? params.number_of_threads : 128;
     if (params.width == 2) {
-        causal_conv1d_fwd_launch<128, 2, input_t, weight_t>(params, stream);
+        causal_conv1d_fwd_launch<nthreads, 2, input_t, weight_t>(params, stream);
     } else if (params.width == 3) {
-        causal_conv1d_fwd_launch<128, 3, input_t, weight_t>(params, stream);
+        causal_conv1d_fwd_launch<nthreads, 3, input_t, weight_t>(params, stream);
     } else if (params.width == 4) {
-        causal_conv1d_fwd_launch<128, 4, input_t, weight_t>(params, stream);
+        causal_conv1d_fwd_launch<nthreads, 4, input_t, weight_t>(params, stream);
     }
 }
 

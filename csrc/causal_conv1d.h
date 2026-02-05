@@ -26,6 +26,8 @@ struct ConvParamsBase {
     index_t conv_state_c_stride;
     index_t conv_state_l_stride;
 
+    int number_of_threads = -1; // if negative one, we'll use the default in the method
+
     // Common data pointers.
     void *__restrict__ x_ptr;
     void *__restrict__ weight_ptr;

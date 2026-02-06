@@ -1,0 +1,27 @@
+
+
+torch.__version__  = 2.8.0a0+git7d205b2
+
+
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d.h -> /shared/home/ansh/causal-conv1d/csrc/causal_conv1d.h [skipped, no changes]
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d.cpp -> /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_hip.cpp [ok]
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d_common.h -> /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_common_hip.h [skipped, already hipified]
+/shared/home/ansh/causal-conv1d/csrc/static_switch.h -> /shared/home/ansh/causal-conv1d/csrc/static_switch.h [skipped, no changes]
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d_fwd.cu -> /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_fwd.hip [skipped, already hipified]
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d_bwd.cu -> /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_bwd.hip [skipped, already hipified]
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d_update.cu -> /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_update.hip [skipped, already hipified]
+Total number of unsupported CUDA function calls: 0
+
+
+Total number of replaced kernel launches: 5
+running build_ext
+building 'causal_conv1d_cuda' extension
+[1/2] c++ -MMD -MF /shared/home/ansh/causal-conv1d/build/temp.linux-x86_64-cpython-310/csrc/causal_conv1d_hip.o.d -pthread -B /opt/conda/envs/py_3.10/compiler_compat -Wno-unused-result -Wsign-compare -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /opt/conda/envs/py_3.10/include -fPIC -O2 -isystem /opt/conda/envs/py_3.10/include -fPIC -I/shared/home/ansh/causal-conv1d/csrc -I/opt/conda/envs/py_3.10/lib/python3.10/site-packages/torch/include -I/opt/conda/envs/py_3.10/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/opt/conda/envs/py_3.10/lib/python3.10/site-packages/torch/include/THH -I/opt/rocm/include -I/opt/conda/envs/py_3.10/include/python3.10 -c -c /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_hip.cpp -o /shared/home/ansh/causal-conv1d/build/temp.linux-x86_64-cpython-310/csrc/causal_conv1d_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -O3 -std=c++17 -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=causal_conv1d_cuda
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d_hip.cpp: In function ‘void set_conv_params_fwd(ConvParamsBase&, size_t, size_t, size_t, size_t, int, at::Tensor, at::Tensor, at::Tensor, void*, bool)’:
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d_hip.cpp:90:11: warning: ‘void* memset(void*, int, size_t)’ clearing an object of non-trivial type ‘struct ConvParamsBase’; use assignment or value-initialization instead [-Wclass-memaccess]
+   90 |     memset(&params, 0, sizeof(params));
+      |     ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /shared/home/ansh/causal-conv1d/csrc/causal_conv1d_hip.cpp:19:
+/shared/home/ansh/causal-conv1d/csrc/causal_conv1d.h:9:8: note: ‘struct ConvParamsBase’ declared here
+    9 | struct ConvParamsBase {
+      |        ^~~~~~~~~~~~~~

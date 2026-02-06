@@ -625,14 +625,35 @@ void causal_conv1d_channellast_bwd_launch(ConvParamsBwd &params, cudaStream_t st
 
 template<typename input_t, typename weight_t>
 void causal_conv1d_channellast_bwd_cuda(ConvParamsBwd &params, cudaStream_t stream) {
-    int nthreads = params.number_of_threads > 0 ? params.number_of_threads : 128;
-    if (params.width == 2) {
-        causal_conv1d_channellast_bwd_launch<nthreads, 2, input_t, weight_t>(params, stream);
-    } else if (params.width == 3) {
-        causal_conv1d_channellast_bwd_launch<nthreads, 3, input_t, weight_t>(params, stream);
-    } else if (params.width == 4) {
-        causal_conv1d_channellast_bwd_launch<nthreads, 4, input_t, weight_t>(params, stream);
-    }
+    // Get desired thread count (default to 128 if not set)
+    int nthreads = (params.number_of_threads > 0) ? params.number_of_threads : 128;
+    
+    // Dispatch on both width AND thread count
+    if (nthreads == 128) {
+        if (params.width == 2) {
+            causal_conv1d_channellast_bwd_launch<128, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_channellast_bwd_launch<128, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_channellast_bwd_launch<128, 4, input_t, weight_t>(params, stream);
+        }
+    } else if (nthreads == 256) {
+        if (params.width == 2) {
+            causal_conv1d_channellast_bwd_launch<256, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_channellast_bwd_launch<256, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_channellast_bwd_launch<256, 4, input_t, weight_t>(params, stream);
+        }
+    } else if (nthreads == 512) {
+        if (params.width == 2) {
+            causal_conv1d_channellast_bwd_launch<512, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_channellast_bwd_launch<512, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_channellast_bwd_launch<512, 4, input_t, weight_t>(params, stream);
+        }
+    } 
 }
 
 template void causal_conv1d_bwd_cuda<float, float>(ConvParamsBwd &params, cudaStream_t stream);

@@ -77,7 +77,7 @@ void set_conv_params_fwd(ConvParamsBase &params,
                          const size_t dim,
                          const size_t seqlen,
                          const size_t width,
-                         const size_t number_of_threads,
+                         const int number_of_threads,
                          // device pointers
                          const at::Tensor x,
                          const at::Tensor weight,
@@ -119,7 +119,7 @@ void set_conv_params_bwd(ConvParamsBwd &params,
                          const size_t dim,
                          const size_t seqlen,
                          const size_t width,
-                         const size_t number_of_threads,
+                         const int number_of_threads,
                          // device pointers
                          const at::Tensor x,
                          const at::Tensor weight,
@@ -130,8 +130,8 @@ void set_conv_params_bwd(ConvParamsBwd &params,
                          void* dbias_ptr,
                          bool silu_activation) {
     // Pass in "dout" instead of "out", we're not gonna use "out" at all.
-    set_conv_params_fwd(params, batch, dim, seqlen, width,
-                        x, number_of_threads, weight, dout, bias_ptr, silu_activation);
+    set_conv_params_fwd(params, batch, dim, seqlen, width, number_of_threads,
+                        x, weight, dout, bias_ptr, silu_activation);
 
     // Set the pointers and strides.
     params.dout_ptr = dout.data_ptr();
@@ -158,7 +158,7 @@ causal_conv1d_fwd(const at::Tensor &x,
                   const c10::optional<at::Tensor> &initial_states_,
                   at::Tensor &out,
                   c10::optional<at::Tensor> &final_states_out_,
-                  c10::optional<size_t> number_of_threads,
+                  c10::optional<int> number_of_threads,
                   bool silu_activation) {
     auto input_type = x.scalar_type();
     auto weight_type = weight.scalar_type();
@@ -204,7 +204,8 @@ causal_conv1d_fwd(const at::Tensor &x,
     }
 
     ConvParamsBase params;
-    set_conv_params_fwd(params, batch_size, dim, seqlen, width, number_of_threads, x, weight, out,
+    int nthreads = number_of_threads.has_value() ? number_of_threads.value() : 64;
+    set_conv_params_fwd(params, batch_size, dim, seqlen, width, nthreads, x, weight, out,
                         bias_.has_value() ? bias_.value().data_ptr() : nullptr,
                         silu_activation);
 
@@ -274,7 +275,7 @@ causal_conv1d_bwd(const at::Tensor &x,
                   at::Tensor &dweight,
                   c10::optional<at::Tensor> &dbias_,
                   c10::optional<at::Tensor> &dinitial_states_,
-                  const c10::optional<size_t> &number_of_threads,
+                  const c10::optional<int> &number_of_threads,
                   bool silu_activation) {
     auto input_type = x.scalar_type();
     auto weight_type = weight.scalar_type();
@@ -340,7 +341,8 @@ causal_conv1d_bwd(const at::Tensor &x,
     at::cuda::CUDAGuard device_guard{x.device()};
 #endif
     ConvParamsBwd params;
-    set_conv_params_bwd(params, batch_size, dim, seqlen, width, number_of_threads,
+    int nthreads = number_of_threads.has_value() ? number_of_threads.value() : 128;
+    set_conv_params_bwd(params, batch_size, dim, seqlen, width, nthreads,
                         x, weight, bias_.has_value() ? bias_.value().data_ptr() : nullptr,
                         dout, dx, dweight, bias_.has_value() ? dbias_.value().data_ptr() : nullptr,
                         silu_activation);
@@ -477,7 +479,7 @@ causal_conv1d_update(const at::Tensor &x,
                      bool silu_activation,
                      const c10::optional<at::Tensor> &cache_seqlens_,
                      const c10::optional<at::Tensor> &conv_state_indices_,
-                     const c10::optional<size_t> number_of_threads,
+                     const c10::optional<int> number_of_threads
                      ) {
     auto input_type = x.scalar_type();
     auto weight_type = weight.scalar_type();
@@ -511,7 +513,8 @@ causal_conv1d_update(const at::Tensor &x,
     }
 
     ConvParamsBase params;
-    set_conv_params_fwd(params, batch_size, dim, seqlen, width, number_of_threads, x, weight, out,
+    int nthreads = number_of_threads.has_value() ? number_of_threads.value() : 128;
+    set_conv_params_fwd(params, batch_size, dim, seqlen, width, nthreads, x, weight, out,
                         bias_.has_value() ? bias_.value().data_ptr() : nullptr,
                         silu_activation);
     params.conv_state_ptr = conv_state.data_ptr();

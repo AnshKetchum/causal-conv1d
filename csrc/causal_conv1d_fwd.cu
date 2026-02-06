@@ -137,6 +137,7 @@ void causal_conv1d_fwd_kernel(ConvParamsBase params) {
 template<int kNThreads, int kWidth, typename input_t, typename weight_t>
 void causal_conv1d_fwd_launch(ConvParamsBase &params, cudaStream_t stream) {
     static constexpr int kNElts = sizeof(input_t) == 4 ? 4 : 8;
+    
     BOOL_SWITCH(params.seqlen % kNElts == 0, kIsVecLoad, [&] {
         using Ktraits = Causal_conv1d_fwd_kernel_traits<kNThreads, kWidth, kIsVecLoad, input_t, weight_t>;
         constexpr int kSmemSize = Ktraits::kSmemSize;
@@ -163,14 +164,43 @@ void causal_conv1d_fwd_launch(ConvParamsBase &params, cudaStream_t stream) {
 
 template<typename input_t, typename weight_t>
 void causal_conv1d_fwd_cuda(ConvParamsBase &params, cudaStream_t stream) {
+    // Get desired thread count (default to 128 if not set)
     int nthreads = (params.number_of_threads > 0) ? params.number_of_threads : 128;
-    if (params.width == 2) {
-        causal_conv1d_fwd_launch<nthreads, 2, input_t, weight_t>(params, stream);
-    } else if (params.width == 3) {
-        causal_conv1d_fwd_launch<nthreads, 3, input_t, weight_t>(params, stream);
-    } else if (params.width == 4) {
-        causal_conv1d_fwd_launch<nthreads, 4, input_t, weight_t>(params, stream);
-    }
+    
+    // Dispatch on both width AND thread count
+    if (nthreads == 64) {
+        if (params.width == 2) {
+            causal_conv1d_fwd_launch<64, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_fwd_launch<64, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_fwd_launch<64, 4, input_t, weight_t>(params, stream);
+        }
+    } else if (nthreads == 128) {
+        if (params.width == 2) {
+            causal_conv1d_fwd_launch<128, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_fwd_launch<128, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_fwd_launch<128, 4, input_t, weight_t>(params, stream);
+        }
+    } else if (nthreads == 256) {
+        if (params.width == 2) {
+            causal_conv1d_fwd_launch<256, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_fwd_launch<256, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_fwd_launch<256, 4, input_t, weight_t>(params, stream);
+        }
+    } else if (nthreads == 512) {
+        if (params.width == 2) {
+            causal_conv1d_fwd_launch<512, 2, input_t, weight_t>(params, stream);
+        } else if (params.width == 3) {
+            causal_conv1d_fwd_launch<512, 3, input_t, weight_t>(params, stream);
+        } else if (params.width == 4) {
+            causal_conv1d_fwd_launch<512, 4, input_t, weight_t>(params, stream);
+        }
+    } 
 }
 
 template<int kNThreads_, int kWidth_, int kChunkSizeL_, bool kIsVecLoad_, typename input_t_, typename weight_t_>

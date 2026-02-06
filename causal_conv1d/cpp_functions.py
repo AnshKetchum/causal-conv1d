@@ -107,6 +107,7 @@ def causal_conv1d_fwd_function(
     seq_idx: torch.Tensor | None,
     initial_states: torch.Tensor | None,
     final_states_out: torch.Tensor | None,
+    num_threads: int,
     silu_activation: bool,
 ) -> torch.Tensor:
     out = torch.empty_like(x)
@@ -118,6 +119,7 @@ def causal_conv1d_fwd_function(
         initial_states=initial_states,
         out=out,
         final_states_out=final_states_out,
+        number_of_threads=num_threads,
         silu_activation=silu_activation,
     )
     return out

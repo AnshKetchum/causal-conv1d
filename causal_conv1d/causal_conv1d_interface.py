@@ -18,6 +18,7 @@ class CausalConv1dFn(torch.autograd.Function):
         return_final_states=False,
         final_states_out=None,
         activation=None,
+        num_threads=64,
     ):
         if activation not in [None, "silu", "swish"]:
             raise NotImplementedError("activation must be None, silu, or swish")
@@ -54,7 +55,7 @@ class CausalConv1dFn(torch.autograd.Function):
             final_states_out = None
         ctx.activation = activation in ["silu", "swish"]
         out = causal_conv1d_fwd_function(
-            x, weight, bias, seq_idx, initial_states, final_states_out, ctx.activation
+            x, weight, bias, seq_idx, initial_states, final_states_out, num_threads, ctx.activation
         )
         ctx.save_for_backward(x, weight, bias, seq_idx, initial_states)
         ctx.return_final_states = return_final_states
@@ -66,6 +67,7 @@ class CausalConv1dFn(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dout, *args):
         x, weight, bias, seq_idx, initial_states = ctx.saved_tensors
+        number_of_threads = 512
         dfinal_states = args[0] if ctx.return_final_states else None
         if dout.stride(2) != 1 and dout.stride(1) != 1:
             dout = dout.contiguous()
@@ -82,6 +84,7 @@ class CausalConv1dFn(torch.autograd.Function):
             dfinal_states,
             None,
             ctx.return_dinitial_states,
+            number_of_threads,
             ctx.activation,
         )
         return (
@@ -105,6 +108,7 @@ def causal_conv1d_fn(
     return_final_states=False,
     final_states_out=None,
     activation=None,
+    number_of_threads=64,
 ):
     """
     x: (batch, dim, seqlen)
@@ -126,6 +130,7 @@ def causal_conv1d_fn(
         return_final_states,
         final_states_out,
         activation,
+        number_of_threads
     )
 
 
